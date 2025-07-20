@@ -1,0 +1,1 @@
+export const DEFAULT_SLIPPAGE_PERCENT = 0.02;

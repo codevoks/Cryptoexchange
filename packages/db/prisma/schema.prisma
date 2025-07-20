@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @unique
+  hashedPassword  String
+
+  orders          Order[]
+  tradesAsBuyer   Trade[] @relation("BuyerTrades")
+  tradesAsSeller  Trade[] @relation("SellerTrades")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+}
+
+model Order {
+  id         String   @id @default(uuid())
+  userId     String
+
+  type       OrderType
+  side       OrderSide
+  price      Decimal  @db.Decimal(65,30)
+  quantity   Decimal  @db.Decimal(65,30)
+  pair       String
+  filled     Decimal  @db.Decimal(65, 30) @default(0)
+  status     OrderStatus @default(PENDING)
+  slippagePercent Float?
+
+  user       User     @relation(fields: [userId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+
+  @@index([status])
+  @@index([userId])
+}
+
+model Trade {
+  id            String   @id @default(uuid())
+  takerOrderId  String
+  makerOrderId  String
+  price         Decimal  @db.Decimal(65,30)
+  quantity      Decimal  @db.Decimal(65,30)
+  pair          String
+  buyerId       String
+  sellerId      String
+  timestamp     DateTime @default(now())
+
+  buyer         User     @relation("BuyerTrades", fields: [buyerId], references: [id])
+  seller        User     @relation("SellerTrades", fields: [sellerId], references: [id])
+
+  @@index([takerOrderId])
+  @@index([makerOrderId])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+enum OrderType {
+  MARKET
+  LIMIT
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+enum OrderStatus {
+  PENDING
+  FILLED
+  CANCELLED
+}
