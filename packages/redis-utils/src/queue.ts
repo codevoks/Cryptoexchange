@@ -1,4 +1,4 @@
-import { queueClient } from "./redis.js"
+import { queueClient } from "./redis"
 
 export async function pushToQueue(queueName:string, payload:any){
     try{

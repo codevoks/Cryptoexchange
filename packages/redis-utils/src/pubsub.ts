@@ -1,4 +1,4 @@
-import { pubClient, subClient } from "./redis.js"
+import { pubClient, subClient } from "./redis"
 
 export async function redisPublish(channel: string, message: any){
     try {

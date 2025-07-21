@@ -11,7 +11,7 @@
       "@repo/types/*": ["../../packages/types/src/*"],
       "@repo/auth-utils/*": ["../../packages/auth-utils/src/*"],
       "@repo/db/*": ["../../packages/db/src/*"],
-      "@repo/redis-utils": ["../../packages/redis-utils/src/*"],
+      "@repo/redis-utils/*": ["../../packages/redis-utils/src/*"],
       "@/*": ["./*"]
     },
   },

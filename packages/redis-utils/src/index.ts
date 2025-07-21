@@ -1,3 +1,3 @@
-export * from "./redis.js";
-export * from "./queue.js";
-export * from "./pubsub.js";
+export * from "./redis";
+export * from "./queue";
+export * from "./pubsub";

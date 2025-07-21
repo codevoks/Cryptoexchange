@@ -6,16 +6,22 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    console.log("📦 Received order body:", body);
+
     const order: CreateOrderInput = {
       ...body,
       slippagePercent: body.slippagePercent ?? undefined,
     };
 
-    await pushToQueue('DB_queue',order);
+    console.log("🧾 Final order object:", order);
+
+    await pushToQueue('MATCHER_queue', order);
+
+    console.log("✅ Order pushed to MATCHER_queue");
 
     return NextResponse.json({ message: 'Order queued to engine' });
   } catch (err) {
-    console.error('Queue error:', err);
+    console.error('❌ Queue error:', err);
     return NextResponse.json({ error: 'Failed to queue order' }, { status: 500 });
   }
 }

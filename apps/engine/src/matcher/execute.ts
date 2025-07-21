@@ -21,5 +21,5 @@ export function executeOrder (newOrder: CreateOrderInput, orderbook: OrderBook, 
     }
     orderbook.reduceOrderQuantity(existingOrder,tradedQuantity);
     newOrder.quantity-=tradedQuantity;
-    pushToQueue('db_queue',trade);
+    pushToQueue('DB_queue',trade);
 }
