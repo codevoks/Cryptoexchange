@@ -5,8 +5,9 @@ import { TradePayload } from "@repo/types/trade";
 import { OrderSide } from "@prisma/client";
 import { OrderBook } from "../orderbook/orderbook";
 
-export function executeOrder (newOrder: CreateOrderInput, orderbook: OrderBook, bestPrice: number, targetSide: OrderSide) : void {
+export async function executeOrder (newOrder: CreateOrderInput, orderbook: OrderBook, bestPrice: number, targetSide: OrderSide) : Promise<void> {
     const existingOrder = orderbook.getOrdersAtPrice(bestPrice, targetSide)[0];
+    console.log(" inside execute existingOrder ",executeOrder);
     if(!existingOrder){
         return;
     }
@@ -22,5 +23,8 @@ export function executeOrder (newOrder: CreateOrderInput, orderbook: OrderBook, 
     }
     orderbook.reduceOrderQuantity(existingOrder,tradedQuantity);
     newOrder.quantity-=tradedQuantity;
-    pushToQueue(QUEUE_NAMES.TRADES,trade);
+    await pushToQueue(QUEUE_NAMES.TRADES,trade);
+    console.log(" execute before printOrderBook ");
+    orderbook.printOrderBook();
+    console.log(" execute after printOrderBook ");
 }

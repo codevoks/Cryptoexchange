@@ -11,11 +11,15 @@ export async function pushToQueue(queueName:string, payload:any){
 
 export async function consumeFromQueue(queueName:string, handler: (data:any) => Promise<void>){
     try {
+        console.log("consumeFromQueue queueName "+queueName);
         while(true){
+            console.log("BEFORE result");
             const result = await queueClient.brPop(queueName,0);
+            console.log(" RESULT ",result);
+            console.log("AFTER result");
             if(result?.element){
                 const data = JSON.parse(result.element);
-                console.log("🔥 Got order from queue "+queueName+" data -> "+data);
+                console.log("🔥 Got order from queue "+queueName+" data -> ",data);
                 await handler(data);
             }
         }

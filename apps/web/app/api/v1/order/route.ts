@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     console.log("✅ Order pushed to MATCHER_queue");
 
-    return NextResponse.json({ message: 'Order queued to engine' });
+    return NextResponse.json({ message: 'Order queued to engine', order });
   } catch (err) {
     console.error('❌ Queue error:', err);
     return NextResponse.json({ error: 'Failed to queue order' }, { status: 500 });

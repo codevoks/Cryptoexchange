@@ -32,10 +32,14 @@ export class OrderBook {
     }
 
     addOrder(order:CreateOrderInput): void{
+        console.log("start addOrder");
+        console.log("order to add ",order);
         const price = order.pricePerUnit;
         if(price==undefined){
+            console.log("order RETURN");
             return;
         }
+        console.log("crossed price==undefined");
         let { levels, prices }  = this.getSideData(order);
         //let level = levels.get(price);
         //level?.push(order);  in case when there is no level for a given price, it won't create one and push the order there)
@@ -47,6 +51,10 @@ export class OrderBook {
         //here this map's value is getting passed by reference so the map will get updated and not the level variable
         let level = levels.get(price);
         level?.push(order);
+        console.log(" printing orderbook from addOrder before");
+        this.printOrderBook();
+        console.log(" printing orderbook from addOrder after ")
+        console.log("end addOrder");
     }
 
     removeOrder(order: CreateOrderInput): void{
@@ -104,4 +112,31 @@ export class OrderBook {
         return (side === "BUY" ? this.bidLevels.get(price) : this.askLevels.get(price)) ?? [];
     }
     */
+   printOrderBook(): void {
+    console.log("======== ORDER BOOK ========");
+    
+    console.log("\n--- ASK (Sell Orders) ---");
+    if (this.askPrices.length === 0) {
+        console.log("No asks");
+    } else {
+        for (const price of this.askPrices) {
+            const orders = this.askLevels.get(price)!;
+            const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
+            console.log(`Price: ${price} | Orders: ${orders.length} | Total Qty: ${totalQty}`);
+        }
+    }
+
+    console.log("\n--- BID (Buy Orders) ---");
+    if (this.bidPrices.length === 0) {
+        console.log("No bids");
+    } else {
+        for (const price of this.bidPrices) {
+            const orders = this.bidLevels.get(price)!;
+            const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
+            console.log(`Price: ${price} | Orders: ${orders.length} | Total Qty: ${totalQty}`);
+        }
+    }
+
+    console.log("============================\n");
+}
 }
