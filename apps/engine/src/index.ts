@@ -1,8 +1,9 @@
-import { initMatcherQueue } from "./queue/queue-matcher";
-import { initDBQueue } from "./queue/queue-db";
+import { QUEUE_NAMES } from "@repo/redis-utils/constants";
+import { initOrdersQueue } from "./queue/queue-matcher";
+import { initTradesQueue } from "./queue/queue-db";
 
 async function init() {
-    await Promise.all([initMatcherQueue('matcher_queue'),initDBQueue('DB_queue')]);
+    await Promise.all([initOrdersQueue(QUEUE_NAMES.ORDERS),initTradesQueue(QUEUE_NAMES.TRADES)]);
 }
 
 init();

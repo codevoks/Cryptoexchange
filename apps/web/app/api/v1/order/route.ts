@@ -1,3 +1,4 @@
+import { QUEUE_NAMES } from "@repo/redis-utils/constants";
 import { pushToQueue } from '@repo/redis-utils/queue';
 import { CreateOrderInput } from '@repo/types/order';
 import { NextResponse } from 'next/server';
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
 
     console.log("🧾 Final order object:", order);
 
-    await pushToQueue('MATCHER_queue', order);
+    await pushToQueue(QUEUE_NAMES.ORDERS, order);
 
     console.log("✅ Order pushed to MATCHER_queue");
 

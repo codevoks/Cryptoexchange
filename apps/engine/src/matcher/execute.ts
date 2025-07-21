@@ -1,3 +1,4 @@
+import { QUEUE_NAMES } from "@repo/redis-utils/constants";
 import { pushToQueue } from "@repo/redis-utils/queue"
 import { CreateOrderInput } from "@repo/types/order";
 import { TradePayload } from "@repo/types/trade";
@@ -21,5 +22,5 @@ export function executeOrder (newOrder: CreateOrderInput, orderbook: OrderBook, 
     }
     orderbook.reduceOrderQuantity(existingOrder,tradedQuantity);
     newOrder.quantity-=tradedQuantity;
-    pushToQueue('DB_queue',trade);
+    pushToQueue(QUEUE_NAMES.TRADES,trade);
 }

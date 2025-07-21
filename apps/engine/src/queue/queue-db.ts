@@ -1,7 +1,7 @@
 import { startQueue } from "./queue-service";
 import { handleTradeInsert } from "../trade-service.ts/trade.service";
 
-export async function initDBQueue(queueName: string) {
+export async function initTradesQueue(queueName: string) {
     try {
         startQueue(queueName,handleTradeInsert);
     } catch (error) {

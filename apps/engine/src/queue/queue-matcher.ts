@@ -1,7 +1,7 @@
 import { startQueue } from "./queue-service";
 import { match } from "../matcher/matching";
 
-export async function initMatcherQueue(queueName: string) {
+export async function initOrdersQueue(queueName: string) {
     try {
         startQueue(queueName,match)
     } catch (error) {
