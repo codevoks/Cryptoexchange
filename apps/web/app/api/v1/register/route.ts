@@ -5,8 +5,8 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { createUser, getUserByEmail } from "@repo/db/index";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const SALT_ROUNDS = Number(process.env.SALT_ROUNDS);
+import { JWT_SECRET } from "@/app/constants/constant";
+import { SALT_ROUNDS } from "@/app/constants/constant";
 
 export async function POST(request: NextRequest){
     try {

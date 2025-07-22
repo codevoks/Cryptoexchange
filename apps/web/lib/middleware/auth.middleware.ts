@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { jwtVerify } from '@repo/auth-utils/jwt';
 
-const JWT_SECRET = process.env.JWT_SECRET;
+import { JWT_SECRET } from '@/app/constants/constant';
 
 export default function authMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
