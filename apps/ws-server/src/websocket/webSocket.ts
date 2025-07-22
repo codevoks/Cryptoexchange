@@ -77,6 +77,6 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 });
 
 // Start HTTP + WS server
-server.listen(4000, () => {
-  console.log('🧠 WebSocket server running at ws://localhost:4000');
+server.listen(8080, () => {
+  console.log('🧠 WebSocket server running at ws://localhost:8080');
 });
