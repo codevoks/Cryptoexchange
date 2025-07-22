@@ -4,7 +4,8 @@ import { jwtSign } from "@repo/auth-utils/jwt"
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 import { getUserByEmail } from "@repo/db/index";
-import { JWT_SECRET } from "@/app/constants/constant";
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function POST(request: NextRequest){
     try {
