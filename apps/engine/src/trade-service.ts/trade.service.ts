@@ -1,6 +1,7 @@
 import { prisma } from '@repo/db/lib/prisma';
 import { TradePayload } from '@repo/types/trade';
 import { Trade } from "@prisma/client";
+import { insertTradeInDB } from "@repo/db/trade"
 
 export async function handleTradeInsert(data: TradePayload) {
     await insertTradeInDB(data);

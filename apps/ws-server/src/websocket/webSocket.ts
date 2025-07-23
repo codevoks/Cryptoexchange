@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import { redisSubscribe, redisUnsubscribe } from '@repo/redis-utils/pubsub';
 import { IncomingMessage } from 'http';
 
+const WS_PORT = process.env.WS_PORT;
 const server = createServer();
 const wss = new WebSocketServer({ server });
 
@@ -77,6 +78,6 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 });
 
 // Start HTTP + WS server
-server.listen(8080, () => {
-  console.log('🧠 WebSocket server running at ws://localhost:8080');
+server.listen(WS_PORT, () => {
+  console.log('🧠 WebSocket server running at ws://localhost:'+WS_PORT);
 });

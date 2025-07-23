@@ -1,8 +1,10 @@
 import { createClient } from 'redis';
 
-export const queueClient = createClient();
-export const pubClient = createClient();
-export const subClient = createClient();
+const URL_REDIS_CONN = process.env.URL_REDIS_CONN || 'redis://localhost:6379';
+
+export const queueClient = createClient({ url: URL_REDIS_CONN });
+export const pubClient = createClient({ url: URL_REDIS_CONN });
+export const subClient = createClient({ url: URL_REDIS_CONN });
 
 pubClient.on('error', (err) => console.error('Redis Pub Error:', err));
 queueClient.on('error', (err) => console.error('Redis Queue Error:', err));
