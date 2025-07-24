@@ -1,3 +1,7 @@
+import * as dotenv from 'dotenv';
+import { resolve } from 'path';
+dotenv.config({ path: resolve(__dirname, '../../../.env') });
+
 import { QUEUE_NAMES } from "@repo/redis-utils/constants";
 import { initOrdersQueue } from "./queue/queue-matcher";
 import { initTradesQueue } from "./queue/queue-db";

@@ -21,7 +21,7 @@ export default function OrderBook() {
   const [trades, setTrades] = useState<Trade[]>([]);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8080?symbols=BTC/USDT"); // Replace with your actual URL
+    const ws = new WebSocket("${WS_URL}?symbols=BTC/USDT"); // Replace with your actual URL
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);

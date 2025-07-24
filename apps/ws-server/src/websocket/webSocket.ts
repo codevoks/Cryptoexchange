@@ -1,4 +1,4 @@
-// apps/ws-server/index.ts
+// apps/ws-server/src/index.ts
 
 import WebSocket, { WebSocketServer } from 'ws';
 import { createServer } from 'http';

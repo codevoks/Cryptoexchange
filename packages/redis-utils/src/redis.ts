@@ -1,10 +1,16 @@
+import dotenv from "dotenv";
+dotenv.config({ path: "../../.env" });
 import { createClient } from 'redis';
 
-const URL_REDIS_CONN = process.env.URL_REDIS_CONN || 'redis://localhost:6379';
+const REDIS_URL = process.env.REDIS_URL;
 
-export const queueClient = createClient({ url: URL_REDIS_CONN });
-export const pubClient = createClient({ url: URL_REDIS_CONN });
-export const subClient = createClient({ url: URL_REDIS_CONN });
+if (!process.env.REDIS_URL) {
+  throw new Error("REDIS_URL is not set in the environment.");
+}
+
+export const queueClient = createClient({ url: REDIS_URL });
+export const pubClient = createClient({ url: REDIS_URL });
+export const subClient = createClient({ url: REDIS_URL });
 
 pubClient.on('error', (err) => console.error('Redis Pub Error:', err));
 queueClient.on('error', (err) => console.error('Redis Queue Error:', err));
