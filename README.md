@@ -1,84 +1,82 @@
-# Turborepo starter
-
-This Turborepo starter is maintained by the Turborepo core team.
-
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
+# McRyptoX
+This is a crpto currency exchage in Turborepo
+## Prerequisites
+```
+- Node.js
+- Docker (Optional)
+- npm
+- PostgreSQL & Redis (installed locally or via Docker)
 ```
 
-## What's inside?
+## Project Structure (Monorepo)
+```bash
+apps/
+  web/              # Next.js frontend app
+  matching-engine/  # Matching engine for processing orders
+  ws-server/        # WebSocket server for real-time trading data
 
-This Turborepo includes the following packages/apps:
+packages/
+  db/               # Prisma + database access logic
+  redis-utils/      # Redis pub/sub + queue logic
+  auth-utils/       # JWT, password hashing, etc.
+  types/            # Shared TypeScript types across apps
 
-### Apps and Packages
+configs/
+  typescript/       # Shared TypeScript configurations
+  tailwind/         # Shared TailwindCSS config (if used)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
+data/
+  postgres/         # PostgreSQL volume (for Docker)
+  redis/            # Redis volume (for Docker)
 ```
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
+## Setup 1 - Local Development (without Docker)
 ```
-cd my-turborepo
-pnpm dev
+# 1. Clone the repository
+git clone https://github.com/codevoks/Cryptoexchange.git
+cd Cryptoexchange
+
+# 2. Install dependencies
+npm install
+
+# 3. Setup environment variables
+cp .env.example.local .env
+# ➤ Edit .env with your DB, Redis, etc.
+
+# 4. Push database schema
+npx prisma db push
+
+# 5. Generate Prisma Client
+npx prisma generate
+
+# 6. build the project
+npx turbo run build
+
+# 7. run the project
+npx turbo run build
 ```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
+## Setup 2 - Docker Development (with Docker)
 ```
-cd my-turborepo
-npx turbo login
+# 1. Clone the repository
+git clone https://github.com/codevoks/Cryptoexchange.git
+cd Cryptoexchange
+
+# 2. Create your .env file
+cp .env.example.docker .env
+# ➤ Fill required values
+
+# 3. Build images
+docker-compose build --no-cache
+
+# 4. Start everything using Docker Compose
+docker-compose up
+
+# 5.(Optional) Tear down
+docker-compose down
 ```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
+## Data Folder (Local Volume)
 ```
-npx turbo link
+data/
+  postgres/       # PostgreSQL volume
+  redis/          # Redis volume
 ```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
