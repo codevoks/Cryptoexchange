@@ -1,0 +1,28 @@
+# Use official Node image
+FROM node:18
+
+# Set root monorepo working directory
+WORKDIR /app
+
+# Copy root files
+COPY package.json package-lock.json turbo.json .npmrc ./
+
+# 👇 Add workspaces early so npm can see them
+COPY apps/ apps/
+COPY packages/ packages/
+
+# Install all dependencies once (important for turbo caching)
+RUN npm install --workspaces --legacy-peer-deps
+
+# Copy everything (apps, packages, etc.)
+COPY . .
+
+# Go into app folder and build web only
+RUN npx turbo run build --filter=web...
+
+# Expose web port
+EXPOSE 3000
+
+# Start dev server from correct folder
+WORKDIR /app/apps/web
+CMD ["npm", "run", "dev"]

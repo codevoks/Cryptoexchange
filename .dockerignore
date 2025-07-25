@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/dist
+**/build
+**/.turbo
+**/.env.local
+**/.env.*
+.dockerignore
+.git
+Dockerfile*
+docker-compose.*
+*.log

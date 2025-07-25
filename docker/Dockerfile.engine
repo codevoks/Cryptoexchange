@@ -1,0 +1,23 @@
+FROM node:18
+
+WORKDIR /app
+
+# Copy root files
+COPY package.json package-lock.json turbo.json .npmrc ./
+
+# 👇 Workspaces chahiye
+COPY apps/ apps/
+COPY packages/ packages/
+
+# Install dependencies
+RUN npm install --workspaces --legacy-peer-deps
+
+# Full copy
+COPY . .
+
+# Build only matching-engine
+RUN npx turbo run build --filter=engine...
+
+WORKDIR /app/apps/engine
+
+CMD ["npm", "run", "dev"]
