@@ -10,7 +10,7 @@ export async function insertTradeInDB(data: TradePayload): Promise<Trade> {
             price: data.price,
             quantity: data.quantity,
             side: data.side,
-            pair: data.symbol,
+            symbol: data.symbol,
             buyerId: data.buyerId,
             sellerId: data.sellerId
         }

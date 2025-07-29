@@ -10,7 +10,7 @@ export async function createOrder(data: CreateOrderInput): Promise<Order> {
       side: data.side,
       price: data.pricePerUnit,
       quantity: data.quantity,
-      pair: data.pair
+      pair: data.symbol
     },
   });
 }

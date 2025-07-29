@@ -52,7 +52,7 @@ model Trade {
   price         Decimal  @db.Decimal(65,30)
   quantity      Decimal  @db.Decimal(65,30)
   side          TradeSide
-  pair          String
+  symbol        String
   buyerId       String
   sellerId      String
   timestamp     DateTime @default(now())
