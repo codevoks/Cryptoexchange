@@ -4,7 +4,7 @@ import OrderBook from "@/components/OrderBook";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="text-white p-4">Loading chart...</div>}>
+    <Suspense fallback={<div className="p-4 text-white">Loading chart...</div>}>
       <ChartClient />
     </Suspense>
   );

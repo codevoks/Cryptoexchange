@@ -3,7 +3,7 @@ export interface TradePayload {
   sellerOrderId: string;
   price: number;
   quantity: number;
-  pair: string;
+  symbol: string;
   buyerId: string;
   sellerId: string;
 }

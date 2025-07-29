@@ -5,34 +5,37 @@ import { CreateOrderInput } from "@repo/types/order";
 import { DEFAULT_SLIPPAGE_PERCENT } from "./constants";
 import { executeOrder } from "./execute";
 import { publishOrderBookUpdate } from "../publisher/publisher";
+import { setUpdate } from "@repo/redis-utils/snapshot"
+import { MessageType } from "@repo/types/message";
 
 export async function match (order:CreateOrderInput){
-    console.log("inside match ");
-    const pair = order.pair;
-    const orderbook = orderBookRegistry.getOrderBook(pair);
+    const symbol = order.symbol;
+    const orderbook = orderBookRegistry.getOrderBook(symbol);
     const targetSide: OrderSide = getTargetSide(order);
     setQuotePrice(order,targetSide,orderbook);
+    const ORDERBOOK_CHANNEL = process.env.REDIS_CHANNEL_ORDERBOOK_PREFIX+":"+symbol;
+    console.log('ORDERBOOK_CHANNEL is ',ORDERBOOK_CHANNEL);
     while(order.quantity > 0){
-        console.log("INF MATCH")
         const bestPrice = orderbook.getBestPrice(targetSide);
-        if(!bestPrice || (targetSide==="BUY" ? bestPrice<order.pricePerUnit! : bestPrice>order.pricePerUnit!)) { // either there is no order at all in the list or the best price is not good enough
+        if(!bestPrice || (targetSide===OrderSide.BUY ? bestPrice<order.pricePerUnit! : bestPrice>order.pricePerUnit!)) { // either there is no order at all in the list or the best price is not good enough
             orderbook.addOrder(order);
-            publishOrderBookUpdate(`orderbook_updates:${pair}`, orderbook);
-            console.log(" matching before printOrderBook ");
             orderbook.printOrderBook();
-            console.log(" matching after printOrderBook ");
+            const snapshot = orderbook.getOrderBookSnapshot();
+            publishOrderBookUpdate(ORDERBOOK_CHANNEL, snapshot);
+            setUpdate(ORDERBOOK_CHANNEL,MessageType.ORDERBOOK,snapshot);
             break;
         }else{
             await executeOrder(order,orderbook,bestPrice,targetSide);
-        publishOrderBookUpdate(`orderbook_updates:${pair}`, orderbook); 
+            const snapshot = orderbook.getOrderBookSnapshot();
+            publishOrderBookUpdate(ORDERBOOK_CHANNEL, snapshot);
+            setUpdate(ORDERBOOK_CHANNEL,MessageType.ORDERBOOK,snapshot);
+        }
     }
-}
-    console.log("outside match ");
 }
 
 
 function getTargetSide (order: CreateOrderInput) : OrderSide {
-    return order.side === "BUY" ? "SELL" : "BUY";
+    return order.side === OrderSide.BUY ? OrderSide.SELL : OrderSide.BUY;
 }
 
 function setQuotePrice(order: CreateOrderInput, targetSide: OrderSide, orderbook: OrderBook):void {

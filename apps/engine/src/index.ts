@@ -9,9 +9,7 @@ import { initTradesQueue } from "./queue/queue-db";
 async function init() {
     console.clear();
     console.log("🚀 Starting Matching Engine...");
-    console.log("Before promise");
     await Promise.all([initOrdersQueue(QUEUE_NAMES.ORDERS),initTradesQueue(QUEUE_NAMES.TRADES)]);
-    console.log("After promise");
 }
 
 init();

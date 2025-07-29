@@ -138,9 +138,13 @@ export default function ChartClient() {
 
     // WebSocket for real-time updates
     const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1m`);
+    ws.onopen = () => {
+      console.log("✅ WebSocket connected");
+      setLoading(false);
+    };
     ws.onmessage = (event) => {
       const { k } = JSON.parse(event.data);
-      console.log("WebSocket message:", k); // Debug log
+      //onsole.log("WebSocket message:", k); // Debug log
       const newCandle = transformBinanceCandle([k.t, k.o, k.h, k.l, k.c]);
       const newVolume = transformBinanceVolume([k.t, k.o, k.h, k.l, k.c, k.v]);
 
@@ -157,8 +161,12 @@ export default function ChartClient() {
         return { ...prev, candles, volumes };
       });
     };
+
+    ws.onclose = (event) => {
+      console.warn("🔌 WebSocket closed", event);
+    };
     ws.onerror = (err) => {
-      console.error("WebSocket error:", err);
+      console.error("❌ WebSocket error", err);
       setError(`Real-time data connection failed for ${symbol}.`);
     };
 
@@ -171,18 +179,18 @@ export default function ChartClient() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-8 py-6 font-sans">
+    <div className="min-h-screen px-8 py-6 font-sans text-white bg-black">
       {loading && <CryptoLoader logo={symbolData.logo} loading={loading} />}
       {error && (
-        <div className="text-center text-red-500 mb-4">{error}</div>
+        <div className="mb-4 text-center text-red-500">{error}</div>
       )}
       {!loading && !error && (
         <>
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-accent pb-4">
+          <div className="flex flex-col items-start justify-between pb-4 mb-6 border-b md:flex-row md:items-center border-accent">
             <div className="flex items-center space-x-4">
               <Link href="/markets">
-                <button className="bg-accent hover:bg-accent-hover text-black px-5 py-2 rounded-lg font-medium shadow-lg transition border border-accent cursor-pointer">
+                <button className="px-5 py-2 font-medium text-black transition border rounded-lg shadow-lg cursor-pointer bg-accent hover:bg-accent-hover border-accent">
                   Back to Markets
                 </button>
               </Link>
@@ -196,13 +204,13 @@ export default function ChartClient() {
                 <h2 className="text-3xl font-bold tracking-wide text-accent">
                   {symbolData.fullName} ({symbolData.name})
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">Powered by Binance WebSocket</p>
+                <p className="mt-1 text-sm text-gray-500">Powered by Binance WebSocket</p>
               </div>
             </div>
             <div className="mt-4 md:mt-0">
               <button
                 onClick={handleRefresh}
-                className="bg-accent hover:bg-accent-hover text-black px-5 py-2 rounded-lg font-medium shadow-lg transition border border-accent cursor-pointer"
+                className="px-5 py-2 font-medium text-black transition border rounded-lg shadow-lg cursor-pointer bg-accent hover:bg-accent-hover border-accent"
               >
                 Refresh
               </button>
@@ -215,7 +223,7 @@ export default function ChartClient() {
               <div className="w-[60%]">
                 <TradingChart symbols={[symbolData]} />
               </div>
-              <OrderBook />
+              <OrderBook symbol={symbol}/>
               <TradeTrigger />
             </div>
           </div>

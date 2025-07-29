@@ -3,12 +3,12 @@ import { jwtVerify } from '@repo/auth-utils/jwt';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-export default function authMiddleware(request: NextRequest) {
+export default async function authMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const PUBLIC_PATH = ['/','home','/login','/about','/register'];
-  const isPublic = PUBLIC_PATH.some((path) => pathname.startsWith(path));
+  const PUBLIC_PATHS = ['/','home','/login','/about','/register'];
+  const isPublicPath = PUBLIC_PATHS.includes(pathname);
 
-  if(isPublic){   //let the request go
+  if(isPublicPath){   //let the request go
     return NextResponse.next();
   }
   const token = request.cookies.get('token')?.value;
@@ -16,7 +16,7 @@ export default function authMiddleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   try {
-    const payload = jwtVerify(token, JWT_SECRET as string);
+    const payload = await jwtVerify(token, JWT_SECRET as string);
     if (!payload) {
       return NextResponse.redirect(new URL('/login', request.url));
     }

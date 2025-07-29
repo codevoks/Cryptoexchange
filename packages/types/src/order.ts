@@ -5,7 +5,7 @@ export interface CreateOrderInput {
   userId: string;
   type: OrderType;
   side: OrderSide;
-  pair: string;
+  symbol: string;
   pricePerUnit: number;
   quantity: number;
   slippagePercent?: number;

@@ -1,6 +1,7 @@
 import { CreateOrderInput } from "@repo/types/order";
 import { PriceLevelMap } from "@repo/types/orderBook"
-import type { OrderSide } from "@prisma/client";
+import { OrderSide } from "@prisma/client";
+import { OrderBookLevel,OrderBookSnapshot } from "@repo/types/orderBook"
 
 export class OrderBook {
     private askLevels: PriceLevelMap = new Map;
@@ -26,35 +27,29 @@ export class OrderBook {
 
     getSideData(order:CreateOrderInput){
         return {
-            levels: order.side === "BUY"? this.bidLevels : this.askLevels,
-            prices: order.side === "BUY"? this.bidPrices : this.askPrices
+            levels: order.side === OrderSide.BUY? this.bidLevels : this.askLevels,
+            prices: order.side === OrderSide.BUY? this.bidPrices : this.askPrices
         }
     }
 
     addOrder(order:CreateOrderInput): void{
-        console.log("start addOrder");
-        console.log("order to add ",order);
+        console.log("ADDING ORDER ",order);
         const price = order.pricePerUnit;
         if(price==undefined){
-            console.log("order RETURN");
             return;
         }
-        console.log("crossed price==undefined");
         let { levels, prices }  = this.getSideData(order);
         //let level = levels.get(price);
         //level?.push(order);  in case when there is no level for a given price, it won't create one and push the order there)
         if(!levels.has(price)){
             levels.set(price,[]);
             prices.push(order.pricePerUnit!);
-            prices.sort((a, b) => order.side === "BUY" ? b - a : a - b);
+            prices.sort((a, b) => order.side === OrderSide.BUY ? b - a : a - b);
         }
         //here this map's value is getting passed by reference so the map will get updated and not the level variable
         let level = levels.get(price);
         level?.push(order);
-        console.log(" printing orderbook from addOrder before");
         this.printOrderBook();
-        console.log(" printing orderbook from addOrder after ")
-        console.log("end addOrder");
     }
 
     removeOrder(order: CreateOrderInput): void{
@@ -76,12 +71,12 @@ export class OrderBook {
     }
 
     getBestPrice(side: OrderSide): number | undefined{
-        let prices = side === "BUY" ? this.bidPrices : this.askPrices;
+        let prices = side === OrderSide.BUY ? this.bidPrices : this.askPrices;
         return prices.length > 0 ? prices[0] : undefined;
     }
 
     getOrdersAtPrice(price: number, side: OrderSide): CreateOrderInput[]{
-        const level = side === "BUY" ? this.bidLevels.get(price) : this.askLevels.get(price);
+        const level = side === OrderSide.BUY ? this.bidLevels.get(price) : this.askLevels.get(price);
         return level !== undefined ? level : [];
     }
 
@@ -102,41 +97,65 @@ export class OrderBook {
     }
 
     getSlippagePrice( side: OrderSide, bestPrice: number, slippagePercent: number): number {
-        return side === "BUY" ? bestPrice * (1 + slippagePercent)
+        return side === OrderSide.BUY ? bestPrice * (1 + slippagePercent)
             : bestPrice * (1 - slippagePercent);
     }
     /*
     A smart way to use ternary operator could be
 
     getOrdersAtPrice(price: number, side: OrderSide): Order[] {
-        return (side === "BUY" ? this.bidLevels.get(price) : this.askLevels.get(price)) ?? [];
+        return (side === OrderSide.BUY ? this.bidLevels.get(price) : this.askLevels.get(price)) ?? [];
     }
     */
-   printOrderBook(): void {
-    console.log("======== ORDER BOOK ========");
-    
-    console.log("\n--- ASK (Sell Orders) ---");
-    if (this.askPrices.length === 0) {
-        console.log("No asks");
-    } else {
-        for (const price of this.askPrices) {
-            const orders = this.askLevels.get(price)!;
-            const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
-            console.log(`Price: ${price} | Orders: ${orders.length} | Total Qty: ${totalQty}`);
+    printOrderBook(): void {
+        console.log("======== ORDER BOOK ========");
+        
+        console.log("\n--- ASK (Sell Orders) ---");
+        if (this.askPrices.length === 0) {
+            console.log("No asks");
+        } else {
+            for (const price of this.askPrices) {
+                const orders = this.askLevels.get(price)!;
+                const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
+                console.log(`Price: ${price} | Orders: ${orders.length} | Total Qty: ${totalQty}`);
+            }
         }
+
+        console.log("\n--- BID (Buy Orders) ---");
+        if (this.bidPrices.length === 0) {
+            console.log("No bids");
+        } else {
+            for (const price of this.bidPrices) {
+                const orders = this.bidLevels.get(price)!;
+                const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
+                console.log(`Price: ${price} | Orders: ${orders.length} | Total Qty: ${totalQty}`);
+            }
+        }
+
+        console.log("============================\n");
+    }
+    private getLevels(levels: PriceLevelMap, prices: number[]): OrderBookLevel[] {
+        let cumulativeQty = 0;
+        const result: OrderBookLevel[] = [];
+
+        for (const price of prices) {
+            const orders = levels.get(price)!;
+            const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
+            cumulativeQty += totalQty;
+            result.push({
+            price,
+            quantity: totalQty,
+            cumulativeQuantity: cumulativeQty
+            });
+        }
+
+        return result;
     }
 
-    console.log("\n--- BID (Buy Orders) ---");
-    if (this.bidPrices.length === 0) {
-        console.log("No bids");
-    } else {
-        for (const price of this.bidPrices) {
-            const orders = this.bidLevels.get(price)!;
-            const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
-            console.log(`Price: ${price} | Orders: ${orders.length} | Total Qty: ${totalQty}`);
-        }
+    public getOrderBookSnapshot(): OrderBookSnapshot {
+        return {
+            bids: this.getLevels(this.bidLevels, this.bidPrices),
+            asks: this.getLevels(this.askLevels, this.askPrices)
+        };
     }
-
-    console.log("============================\n");
-}
 }

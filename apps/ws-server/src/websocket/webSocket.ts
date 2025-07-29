@@ -17,15 +17,18 @@ async function handleRedisSubscription(symbol: string) {
   if (subscribedSymbols.has(symbol)) return; // already subscribed
 
   subscribedSymbols.add(symbol);
-
-  await redisSubscribe(`orderbook_updates:${symbol}`, (message: string) => {
+  const ORDERBOOK_CHANNEL = process.env.REDIS_CHANNEL_ORDERBOOK_PREFIX+":"+symbol;
+  await redisSubscribe(ORDERBOOK_CHANNEL, (message: string) => {
+    console.log('Subscribed to '+ORDERBOOK_CHANNEL);
     const conns = clients.get(symbol);
+    console.log("conns is-> "+conns);
     if (!conns) return;
 
     const parsedMessage = JSON.parse(message); // 🔥 Parse once here
 
     for (const ws of conns) {
       if (ws.readyState === WebSocket.OPEN) {
+        console.log('SENDING DATA VIA WS on symbol = ',symbol," parsedMessage = ",parsedMessage );
         ws.send(JSON.stringify({ symbol, data: parsedMessage }));
       }
     }
@@ -34,9 +37,11 @@ async function handleRedisSubscription(symbol: string) {
 
 // Unsubscribe when no clients are listening
 async function handleRedisUnsubscription(symbol: string) {
+  const ORDERBOOK_CHANNEL = process.env.REDIS_CHANNEL_ORDERBOOK_PREFIX+":"+symbol;
+  console.log('Unsubscribed to '+ORDERBOOK_CHANNEL);
   const conns = clients.get(symbol);
   if (!conns || conns.size === 0) {
-    await redisUnsubscribe(`orderbook_updates:${symbol}`);
+    await redisUnsubscribe(ORDERBOOK_CHANNEL);
     subscribedSymbols.delete(symbol);
   }
 }
@@ -51,7 +56,7 @@ function getSymbolsFromQuery(req: IncomingMessage): string[] {
 // 🚀 Client Connection Handler
 wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   const symbols = getSymbolsFromQuery(req);
-
+  console.log('✅ New client connected for symbols:'+ symbols);
   for (const symbol of symbols) {
     if (!clients.has(symbol)) {
       clients.set(symbol, new Set());
@@ -64,6 +69,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   }
 
   ws.on('close', () => {
+    console.log('❌ Client disconnected from symbols:', symbols);
     for (const symbol of symbols) {
       const conns = clients.get(symbol);
       if (!conns) continue;
