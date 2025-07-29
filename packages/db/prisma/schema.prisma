@@ -51,6 +51,7 @@ model Trade {
   makerOrderId  String
   price         Decimal  @db.Decimal(65,30)
   quantity      Decimal  @db.Decimal(65,30)
+  side          TradeSide
   pair          String
   buyerId       String
   sellerId      String
@@ -78,4 +79,9 @@ enum OrderStatus {
   PENDING
   FILLED
   CANCELLED
+}
+
+enum TradeSide {
+  BUY
+  SELL
 }
