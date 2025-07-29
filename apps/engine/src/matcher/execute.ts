@@ -6,6 +6,7 @@ import { OrderSide } from "@prisma/client";
 import { OrderBook } from "../orderbook/orderbook";
 import { redisPublish } from "@repo/redis-utils/pubsub";
 import { MessageType } from "@repo/types/message";
+import { TradeSide } from "@prisma/client";
 
 export async function executeOrder (newOrder: CreateOrderInput, orderbook: OrderBook, bestPrice: number, targetSide: OrderSide) : Promise<void> {
     const existingOrder = orderbook.getOrdersAtPrice(bestPrice, targetSide)[0];
@@ -17,6 +18,7 @@ export async function executeOrder (newOrder: CreateOrderInput, orderbook: Order
         buyerOrderId: targetSide === OrderSide.BUY ? existingOrder.id : newOrder.id,
         sellerOrderId: targetSide === OrderSide.BUY ? newOrder.id : existingOrder.id,
         price: bestPrice,
+        side: newOrder.side === OrderSide.BUY ? TradeSide.BUY : TradeSide.SELL,
         quantity: tradedQuantity,
         symbol: newOrder.symbol,
         buyerId: targetSide === OrderSide.BUY ? existingOrder.userId : newOrder.userId,
