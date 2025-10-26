@@ -1,6 +1,9 @@
 # McRyptoX
+
 This is a crpto currency exchage in Turborepo
+
 ## Prerequisites
+
 ```
 - Node.js
 - Docker (Optional)
@@ -9,6 +12,7 @@ This is a crpto currency exchage in Turborepo
 ```
 
 ## Project Structure (Monorepo)
+
 ```bash
 apps/
   web/              # Next.js frontend app
@@ -31,6 +35,7 @@ data/
 ```
 
 ## Setup 1 - Local Development (without Docker)
+
 ```
 # 1. Clone the repository
 git clone https://github.com/codevoks/Cryptoexchange.git
@@ -53,9 +58,11 @@ npx prisma generate
 npx turbo run build
 
 # 7. run the project
-npx turbo run build
+npx turbo run dev
 ```
+
 ## Setup 2 - Docker Development (with Docker)
+
 ```
 # 1. Clone the repository
 git clone https://github.com/codevoks/Cryptoexchange.git
@@ -74,7 +81,9 @@ docker-compose up
 # 5.(Optional) Tear down
 docker-compose down
 ```
+
 ## Data Folder (Local Volume)
+
 ```
 data/
   postgres/       # PostgreSQL volume
