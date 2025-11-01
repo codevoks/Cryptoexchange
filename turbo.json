@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*","JWT_SECRET","SALT_ROUNDS","DATABASE_URL"],
+      "env": ["DATABASE_URL", "JWT_SECRET", "SALT_ROUNDS"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
@@ -15,7 +15,11 @@
     },
     "dev": {
       "cache": false,
+      "env": ["DATABASE_URL", "JWT_SECRET", "SALT_ROUNDS", "NODE_ENV"],
       "persistent": true
+    },
+    "db:migrate": {
+      "env": ["DATABASE_URL"]
     }
   }
 }
