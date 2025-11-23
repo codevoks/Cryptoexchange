@@ -14,9 +14,9 @@ export type OrderBookSnapshot = {
 };
 
 export interface PriorityQueue<T> {
-  insert(item: T, priority: number): void
-  peek(): T | null
-  pop(): T | null
-  size(): number
-  isEmpty(): boolean
+  insert(item: T, priority: number): void;
+  peek(): T | null;
+  pop(): T | null;
+  size(): number;
+  isEmpty(): boolean;
 }

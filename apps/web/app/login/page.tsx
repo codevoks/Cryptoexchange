@@ -1,5 +1,5 @@
 // app/login/page.tsx
-'use client';
+"use client";
 import AuthLayout from "../../components/AuthLayout";
 import AuthHeader from "../../components/AuthHeader";
 import AuthInput from "../../components/AuthInput";
@@ -12,15 +12,18 @@ import axios from "axios";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [credentials,setCredentials] = useState<LogInType>({email:"",password:""});
+  const [credentials, setCredentials] = useState<LogInType>({
+    email: "",
+    password: "",
+  });
   const [errorMessage, setErrorMessage] = useState("");
-  const handleChange = (e:ChangeEvent)=>{
-    setCredentials({...credentials,[e.target.name]:e.target.value});
-  }
-  const handleSubmit = async (e:MouseEvent)=>{
+  const handleChange = (e: ChangeEvent) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  };
+  const handleSubmit = async (e: MouseEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/v1/login",credentials);
+      const res = await axios.post("/api/v1/login", credentials);
       if (res.status === 200) {
         router.push("/markets");
       }
@@ -28,13 +31,26 @@ export default function LoginPage() {
       setErrorMessage(err.response?.data?.message || "Something went wrong");
       //alert(err);
     }
-  }
+  };
   return (
     <AuthLayout>
       <div className="flex flex-col gap-4">
-        <AuthHeader title="Welcome Back" subtitle="Enter your credentials to continue." />
-        <AuthInput changeHandler={handleChange} type="email" name="email" placeholder="example@email.com" />
-        <AuthInput changeHandler={handleChange} type="password" name="password" placeholder="password" />
+        <AuthHeader
+          title="Welcome Back"
+          subtitle="Enter your credentials to continue."
+        />
+        <AuthInput
+          changeHandler={handleChange}
+          type="email"
+          name="email"
+          placeholder="example@email.com"
+        />
+        <AuthInput
+          changeHandler={handleChange}
+          type="password"
+          name="password"
+          placeholder="password"
+        />
         <div className="w-full h-5 text-sm text-red-500 font-medium">
           {errorMessage}
         </div>

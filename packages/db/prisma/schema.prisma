@@ -47,8 +47,8 @@ model Order {
 
 model Trade {
   id            String   @id @default(uuid())
-  takerOrderId  String
-  makerOrderId  String
+  buyerOrderId  String
+  sellerOrderId  String
   price         Decimal  @db.Decimal(65,30)
   quantity      Decimal  @db.Decimal(65,30)
   side          TradeSide
@@ -60,8 +60,8 @@ model Trade {
   buyer         User     @relation("BuyerTrades", fields: [buyerId], references: [id])
   seller        User     @relation("SellerTrades", fields: [sellerId], references: [id])
 
-  @@index([takerOrderId])
-  @@index([makerOrderId])
+  @@index([buyerOrderId])
+  @@index([sellerOrderId])
   @@index([buyerId])
   @@index([sellerId])
 }

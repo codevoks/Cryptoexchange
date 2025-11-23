@@ -7,7 +7,7 @@ import { UTCTimestamp, CandlestickData, Time } from "lightweight-charts";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import OrderBook from "./OrderBook";
-import TradeTrigger from "./TradeTrigger"
+import TradeTrigger from "./TradeTrigger";
 
 // Types
 type VolumeData = {
@@ -57,7 +57,8 @@ function transformBinanceVolume(candle: any): VolumeData {
   return {
     time: Math.floor(candle[0] / 1000) as UTCTimestamp,
     value: parseFloat(candle[5]),
-    color: parseFloat(candle[4]) >= parseFloat(candle[1]) ? "#26a69a" : "#ef5350",
+    color:
+      parseFloat(candle[4]) >= parseFloat(candle[1]) ? "#26a69a" : "#ef5350",
   };
 }
 
@@ -65,8 +66,9 @@ export default function ChartClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const symbol = searchParams.get("symbol")?.toUpperCase() || "BTCUSDT";
-  const baseAsset = symbol.slice(0, -4); // e.g., "BTC" from "BTCUSDT"
-  const quoteAsset = symbol.slice(-4); // e.g., "USDT"
+  const baseAsset = symbol.slice(0, -4);
+  const quoteAsset = symbol.slice(-4);
+
   const [symbolData, setSymbolData] = useState<SymbolData>({
     name: `${baseAsset}/${quoteAsset}`,
     symbol,
@@ -75,20 +77,25 @@ export default function ChartClient() {
     volumes: [],
     logo: FALLBACK_LOGO,
   });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ New states for price tracking
+  const [lastPrice, setLastPrice] = useState<number | null>(null);
+  const [prevPrice, setPrevPrice] = useState<number | null>(null);
+  const [marketPrice, setMarketPrice] = useState<number | null>(null);
+
   useEffect(() => {
-    // Fetch coin info for logo and full name
     async function fetchCoinInfo() {
       try {
         const coinId = COINGECKO_IDS[baseAsset] || baseAsset.toLowerCase();
         const res = await fetch(
           `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinId}`
         );
-        if (!res.ok) throw new Error(`Failed to fetch CoinGecko data for ${coinId}`);
+        if (!res.ok)
+          throw new Error(`Failed to fetch CoinGecko data for ${coinId}`);
         const data = await res.json();
-        console.log("CoinGecko response:", data); // Debug log
         if (data[0]?.image && data[0]?.name) {
           setSymbolData((prev) => ({
             ...prev,
@@ -96,16 +103,13 @@ export default function ChartClient() {
             fullName: data[0].name,
           }));
         } else {
-          console.warn(`No data found for coinId: ${coinId}`);
           setSymbolData((prev) => ({ ...prev, logo: FALLBACK_LOGO }));
         }
-      } catch (err) {
-        console.error("Failed to load CoinGecko data:", err);
+      } catch {
         setSymbolData((prev) => ({ ...prev, logo: FALLBACK_LOGO }));
       }
     }
 
-    // Fetch historical candles
     async function fetchHistoricalCandles() {
       try {
         setLoading(true);
@@ -115,20 +119,23 @@ export default function ChartClient() {
         const res = await fetch(
           `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=1000&startTime=${startTime}&endTime=${endTime}`
         );
-        if (!res.ok) throw new Error(`Failed to fetch Binance data for ${symbol}`);
+        if (!res.ok)
+          throw new Error(`Failed to fetch Binance data for ${symbol}`);
         const rawData = await res.json();
-        console.log("Binance response:", rawData); // Debug log
         const candles = rawData.map(transformBinanceCandle);
         const volumes = rawData.map(transformBinanceVolume);
-        console.log("Transformed candles:", candles); // Debug log
-        console.log("Transformed volumes:", volumes); // Debug log
-
         setSymbolData((prev) => ({ ...prev, candles, volumes }));
+
+        // Initialize last price
+        if (candles.length > 0) {
+          const lastCandle = candles[candles.length - 1];
+          setLastPrice(lastCandle.close);
+          setMarketPrice(lastCandle.close);
+        }
       } catch (err) {
-        console.error("Failed to load Binance data:", err);
-        setError(`Failed to load chart data for ${symbol}. Please try again.`);
+        console.error(err);
+        setError(`Failed to load chart data for ${symbol}.`);
       } finally {
-        console.log("Setting loading to false"); // Debug log
         setLoading(false);
       }
     }
@@ -136,17 +143,19 @@ export default function ChartClient() {
     fetchCoinInfo();
     fetchHistoricalCandles();
 
-    // WebSocket for real-time updates
-    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1m`);
-    ws.onopen = () => {
-      console.log("✅ WebSocket connected");
-      setLoading(false);
-    };
+    // ✅ WebSocket for live price updates
+    const ws = new WebSocket(
+      `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1m`
+    );
     ws.onmessage = (event) => {
       const { k } = JSON.parse(event.data);
-      //onsole.log("WebSocket message:", k); // Debug log
       const newCandle = transformBinanceCandle([k.t, k.o, k.h, k.l, k.c]);
       const newVolume = transformBinanceVolume([k.t, k.o, k.h, k.l, k.c, k.v]);
+
+      const currentPrice = parseFloat(k.c);
+      setPrevPrice((prev) => lastPrice ?? prev ?? currentPrice);
+      setLastPrice(currentPrice);
+      setMarketPrice(currentPrice);
 
       setSymbolData((prev) => {
         const last = prev.candles[prev.candles.length - 1];
@@ -162,18 +171,9 @@ export default function ChartClient() {
       });
     };
 
-    ws.onclose = (event) => {
-      console.warn("🔌 WebSocket closed", event);
-    };
-    ws.onerror = (err) => {
-      console.error("❌ WebSocket error", err);
-      setError(`Real-time data connection failed for ${symbol}.`);
-    };
-
     return () => ws.close();
   }, [symbol]);
 
-  // Handle refresh
   const handleRefresh = () => {
     router.refresh();
   };
@@ -181,19 +181,66 @@ export default function ChartClient() {
   return (
     <div className="min-h-screen px-8 py-6 font-sans text-white bg-black">
       {loading && <CryptoLoader logo={symbolData.logo} loading={loading} />}
-      {error && (
-        <div className="mb-4 text-center text-red-500">{error}</div>
-      )}
+      {error && <div className="mb-4 text-center text-red-500">{error}</div>}
       {!loading && !error && (
         <>
-          {/* Header */}
+          {/* ===== HEADER ===== */}
           <div className="flex flex-col items-start justify-between pb-4 mb-6 border-b md:flex-row md:items-center border-accent">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <Link href="/markets">
                 <button className="px-5 py-2 font-medium text-black transition border rounded-lg shadow-lg cursor-pointer bg-accent hover:bg-accent-hover border-accent">
                   Back to Markets
                 </button>
               </Link>
+
+              {/* ✅ Price Info */}
+              <div className="flex items-center space-x-6">
+                {/* Last Traded */}
+                <div>
+                  <span className="text-gray-400 text-sm block">
+                    Last Traded
+                  </span>
+                  <span
+                    className="text-lg font-semibold transition-colors duration-300"
+                    style={{
+                      color:
+                        lastPrice && prevPrice
+                          ? lastPrice > prevPrice
+                            ? "#4fff8a"
+                            : lastPrice < prevPrice
+                              ? "#ff6464"
+                              : "#ffffff"
+                          : "#ffffff",
+                    }}
+                  >
+                    {lastPrice?.toFixed(2) ?? "--"}
+                  </span>
+                </div>
+
+                {/* Market Price */}
+                <div>
+                  <span className="text-gray-400 text-sm block">Market</span>
+                  <span
+                    className="text-lg font-semibold transition-colors duration-300"
+                    style={{
+                      color:
+                        marketPrice && lastPrice
+                          ? marketPrice > lastPrice
+                            ? "#4fff8a"
+                            : marketPrice < lastPrice
+                              ? "#ff6464"
+                              : "#ffffff"
+                          : "#ffffff",
+                    }}
+                  >
+                    {marketPrice?.toFixed(2) ?? "--"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Symbol Info */}
+            <div className="flex items-center space-x-3 mt-4 md:mt-0">
               <img
                 src={symbolData.logo}
                 alt={`${symbolData.fullName} logo`}
@@ -204,26 +251,26 @@ export default function ChartClient() {
                 <h2 className="text-3xl font-bold tracking-wide text-accent">
                   {symbolData.fullName} ({symbolData.name})
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">Powered by Binance WebSocket</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Powered by Binance WebSocket
+                </p>
               </div>
-            </div>
-            <div className="mt-4 md:mt-0">
               <button
                 onClick={handleRefresh}
-                className="px-5 py-2 font-medium text-black transition border rounded-lg shadow-lg cursor-pointer bg-accent hover:bg-accent-hover border-accent"
+                className="px-5 py-2 ml-4 font-medium text-black transition border rounded-lg shadow-lg cursor-pointer bg-accent hover:bg-accent-hover border-accent"
               >
                 Refresh
               </button>
             </div>
           </div>
 
-          {/* Chart Card */}
+          {/* ===== CHART + PANELS ===== */}
           <div className="rounded-2xl bg-[#121212] shadow-2xl p-4 border border-gray-800">
             <div className="flex gap-4">
               <div className="w-[60%]">
                 <TradingChart symbols={[symbolData]} />
               </div>
-              <OrderBook symbol={symbol}/>
+              <OrderBook symbol={symbol} />
               <TradeTrigger />
             </div>
           </div>

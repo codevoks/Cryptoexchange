@@ -1,11 +1,14 @@
 // redis pubsub function import kiya
-import { redisPublish } from "@repo/redis-utils/pubsub"; 
+import { redisPublish } from "@repo/redis-utils/pubsub";
+import { TradeBookSnapshot } from "@repo/types/trade";
 import { MessageType } from "@repo/types/message";
-import { OrderBookSnapshot } from "@repo/types/orderBook"
+import { OrderBookSnapshot } from "@repo/types/orderBook";
 
 // 🧠 MAIN FUNCTION
-export function publishOrderBookUpdate(ORDERBOOK_CHANNEL: string, snapShot: OrderBookSnapshot) {
-  console.log('INSIDE publishOrderBookUpdate DEBUG ',ORDERBOOK_CHANNEL);
-  console.log("ORDERBOOK IS ",snapShot);
-  redisPublish(ORDERBOOK_CHANNEL, MessageType.ORDERBOOK, snapShot);
+export function publishBookUpdate(
+  ORDERBOOK_CHANNEL: string,
+  messageType: MessageType,
+  snapShot: OrderBookSnapshot | TradeBookSnapshot
+) {
+  redisPublish(ORDERBOOK_CHANNEL, messageType, snapShot);
 }

@@ -13,19 +13,19 @@ class OrderBookRegistry {
     return OrderBookRegistry.instance;
   }
 
-  getOrderBook(pair: string): OrderBook {
-    if (!this.books.has(pair)) {
-      this.books.set(pair, new OrderBook());
+  getOrderBook(symbol: string): OrderBook {
+    if (!this.books.has(symbol)) {
+      this.books.set(symbol, new OrderBook());
     }
-    return this.books.get(pair)!;
+    return this.books.get(symbol)!;
   }
 
-  getAllBooks(): Map<string, OrderBook> {
+  getAllOrderBooks(): Map<string, OrderBook> {
     return this.books;
   }
 
-  removeOrderBook(pair: string): void {
-    this.books.delete(pair);
+  removeOrderBook(symbol: string): void {
+    this.books.delete(symbol);
   }
 }
 
