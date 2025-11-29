@@ -1,8 +1,10 @@
 import { queueInsertClient, queueConsumeClient } from "./redis";
+import { queuePushCounter, queueConsumeCounter } from "@repo/metrics-utils";
 
 export async function pushToQueue(queueName: string, payload: any) {
   try {
     await queueInsertClient.lPush(queueName, JSON.stringify(payload));
+    queuePushCounter.labels(queueName).inc();
   } catch (error) {
     console.log("Error pushing in redis queue " + queueName + " : ", error);
   }
@@ -19,6 +21,7 @@ export async function consumeFromQueue(
         if (result?.element) {
           const data = JSON.parse(result.element);
           await handler(data);
+          queueConsumeCounter.labels(queueName).inc();
         }
       } catch (error) {
         console.log("ERROR IN result " + error);

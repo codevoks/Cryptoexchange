@@ -5,6 +5,7 @@ import { resolve } from "path";
 import { QUEUE_NAMES } from "@repo/redis-utils/constants";
 import { initOrdersQueue } from "./queue/queue-matcher";
 import { initTradesQueue } from "./queue/queue-db";
+import { startMetricsServer } from "./metrics/metrics";
 
 async function init() {
   console.clear();
@@ -13,6 +14,7 @@ async function init() {
     initOrdersQueue(QUEUE_NAMES.ORDERS),
     initTradesQueue(QUEUE_NAMES.TRADES),
   ]);
+  startMetricsServer(9101);
 }
 
 init();
