@@ -12,5 +12,8 @@
   "types": "./index.ts",
   "exports": {
     "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "jose": "^6.1.0"
   }
 }

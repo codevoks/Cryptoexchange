@@ -9,10 +9,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "module",
+  "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    ".": "./dist/index.js",
-    "./*": "./dist/*.js"
+    "./*": "./src/*.ts"
   },
   "dependencies": {
     "prom-client": "^15.1.3"

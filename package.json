@@ -10,7 +10,10 @@
     "clean": "rm -rf node_modules .turbo apps/web/.next",
     "db:migrate": "dotenv -e .env -- npx prisma migrate dev --schema=packages/db/prisma/schema.prisma",
     "db:studio": "dotenv -e .env -- npx prisma studio --schema=packages/db/prisma/schema.prisma",
-    "flood:orders": "node scripts/floodOrderBook.js"
+    "flood:orders": "node scripts/floodOrderBook.js",
+    "docker:prune:engine": "turbo prune --scope=engine --docker",
+    "docker:prune:web": "turbo prune --scope=web --docker",
+    "docker:prune:ws": "turbo prune --scope=ws-server --docker"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
