@@ -1,28 +1,57 @@
-# Use official Node image
-FROM node:20-alpine
+# -----------------------
+# Builder stage
+# -----------------------
+FROM node:20-alpine AS builder
 
-# Set root monorepo working directory
 WORKDIR /app
 
-# Copy root files
+# Copy root files first
 COPY package.json package-lock.json turbo.json .npmrc ./
 
-# 👇 Add workspaces early so npm can see them
-COPY apps/ apps/
-COPY packages/ packages/
+# Copy web app package.json so npm workspace resolves deps
+COPY apps/web/package.json apps/web/
 
-# Install all dependencies once (important for turbo caching)
-RUN npm install --workspaces --legacy-peer-deps
+# Copy packages folder (including prisma)
+COPY packages packages/
 
-# Copy everything else (optional if already copied above)
+# Prisma CLI expects schema in default location, so copy it
+RUN mkdir -p prisma
+COPY packages/db/prisma/schema.prisma prisma/schema.prisma
+
+# Install dependencies
+RUN npm install --workspaces --legacy-peer-deps --ignore-scripts
+
+# Copy everything else (source files)
 COPY . .
 
-# Go into app folder and build web only
-RUN npx turbo run build --filter=web...
+# Generate Prisma client using the copied schema
+RUN npx prisma generate --schema=prisma/schema.prisma
 
-# Expose web port
+# Build web app
+RUN npx turbo run build --filter=web
+
+# -----------------------
+# Production stage
+# -----------------------
+FROM node:20-alpine
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Copy .next output, public, package.json, node_modules, packages
+COPY --from=builder /app/apps/web/.next ./.next
+COPY --from=builder /app/apps/web/public ./public
+COPY --from=builder /app/apps/web/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+
+# Copy Prisma schema + migrations
+RUN mkdir -p prisma/migrations
+COPY --from=builder /app/packages/db/prisma/schema.prisma prisma/schema.prisma
+COPY --from=builder /app/packages/db/prisma/migrations prisma/migrations
+
+# Expose port
 EXPOSE 3000
 
-# Start dev server from correct folder
-WORKDIR /app/apps/web
-CMD ["npm", "run", "dev"]
+# Run migrations + start app
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=prisma/schema.prisma && npm start"]

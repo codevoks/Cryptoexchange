@@ -1,12 +1,29 @@
+# Node modules & builds
+node_modules
 **/node_modules
+.next
 **/.next
+dist
 **/dist
+build
 **/build
+.turbo
 **/.turbo
-**/.env.local
-**/.env.*
-.dockerignore
-.git
-Dockerfile*
-docker-compose.*
+
+# Logs
 *.log
+
+# Git
+.git
+.gitignore
+
+# Env files except docker version
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# DO NOT IGNORE prisma folders
+!packages/db/prisma/
+!packages/db/prisma/schema.prisma

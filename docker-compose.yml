@@ -1,10 +1,10 @@
-version: "3.8"
-
 services:
   web:
     build:
       context: .
-      dockerfile: docker/Dockerfile.web
+      dockerfile: ./docker/Dockerfile.web
+    image: crypto-web:latest
+    container_name: crypto-web
     ports:
       - "3000:3000"
     depends_on:
@@ -12,45 +12,49 @@ services:
       - ws-server
       - engine
     env_file:
-      - .env
+      - ./.env.docker
 
   ws-server:
     build:
       context: .
-      dockerfile: docker/Dockerfile.ws-server
+      dockerfile: ./docker/Dockerfile.ws-server
+    image: crypto-ws:latest
+    container_name: crypto-ws
     ports:
       - "8080:8080"
     depends_on:
       - redis
     env_file:
-      - .env
+      - ./.env.docker
 
   engine:
     build:
       context: .
-      dockerfile: docker/Dockerfile.engine
+      dockerfile: ./docker/Dockerfile.engine
+    image: crypto-engine:latest
+    container_name: crypto-engine
     depends_on:
       - redis
       - postgres
     env_file:
-      - .env
+      - ./.env.docker
 
   postgres:
     image: postgres:latest
-    container_name: postgres
+    container_name: crypto-postgres
     restart: always
     environment:
       - POSTGRES_DB=mydatabase
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=mypassword
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - ./docker/data/postgres:/var/lib/postgresql
 
   redis:
     image: redis:latest
-    container_name: redis
+    container_name: crypto-redis
     restart: always
     ports:
-      - 6379:6379
+      - "6379:6379"

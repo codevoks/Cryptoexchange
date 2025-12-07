@@ -1,20 +1,37 @@
-FROM node:20-alpine
+# Stage 1: Builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy root files
+# Copy workspace config and package files
+COPY package.json package-lock.json turbo.json .npmrc ./
+COPY apps/engine/package.json apps/engine/
+COPY packages packages/
+
+# Install dependencies (ignore scripts to avoid accidental installs)
+RUN npm install --workspaces --legacy-peer-deps --ignore-scripts
+
+# Copy full source code
 COPY . .
 
-# 👇 Workspaces chahiye
-COPY apps/ apps/
-COPY packages/ packages/
+# Generate Prisma client
+RUN cd packages/db && npx prisma generate --schema=./prisma/schema.prisma
 
-# Install dependencies
-RUN npm install --workspaces --legacy-peer-deps
+# Build engine (bundle all local packages including metrics-utils)
+RUN npx turbo run build --filter=engine
 
-# Build only matching-engine
-RUN npx turbo run build --filter=engine...
+# Stage 2: Production image
+FROM node:20-alpine
+WORKDIR /app
 
-WORKDIR /app/apps/engine
+ENV NODE_ENV=production
 
-CMD ["npm", "run", "dev"]
+# Copy only the built dist and minimal package.json
+COPY --from=builder /app/apps/engine/dist ./dist
+COPY --from=builder /app/apps/engine/package.json ./
+
+# Copy only runtime dependencies
+COPY --from=builder /app/node_modules ./node_modules
+
+# Run the engine
+CMD ["node", "dist/index.js"]

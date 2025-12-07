@@ -1,23 +1,29 @@
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy root config and lockfiles
 COPY package.json package-lock.json turbo.json .npmrc ./
+COPY apps/ws-server/package.json apps/ws-server/
+COPY packages packages/
 
-# 👇 Workspaces bhi chahiye before install
-COPY apps/ apps/
-COPY packages/ packages/
+# Avoid accidental workspace postinstall scripts
+RUN npm install --workspaces --legacy-peer-deps --ignore-scripts
 
-# Install dependencies
-RUN npm install --workspaces --legacy-peer-deps
+COPY . .
 
-# Build only ws-server
-RUN npx turbo run build --filter=ws-server...
+# Generate Prisma client explicitly
+RUN cd packages/db && npx prisma generate --schema=./prisma/schema.prisma
 
-# Change working directory
-WORKDIR /app/apps/ws-server
+RUN npx turbo run build --filter=ws-server
+
+FROM node:20-alpine
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/apps/ws-server/dist ./dist
+COPY --from=builder /app/apps/ws-server/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 8080
-
-CMD ["npm", "run", "dev"]
+CMD ["node", "dist/index.js"]

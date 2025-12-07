@@ -15,6 +15,7 @@
     "./*": "./dist/*.js"
   },
   "dependencies": {
-    "@repo/metrics-utils": "*"
+    "@repo/metrics-utils": "*",
+    "redis": "^4.7.0"
   }
 }
