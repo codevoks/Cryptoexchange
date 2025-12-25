@@ -3,7 +3,16 @@
 # -----------------------
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+WORKDIR /
+
+ARG REDIS_URL
+ARG DATABASE_URL
+ARG JWT_SECRET
+ARG SALT_ROUNDS
+ENV REDIS_URL=$REDIS_URL
+ENV DATABASE_URL=$DATABASE_URL
+ENV JWT_SECRET=$JWT_SECRET
+ENV SALT_ROUNDS=$SALT_ROUNDS
 
 # Copy root files first
 COPY package.json package-lock.json turbo.json .npmrc ./
