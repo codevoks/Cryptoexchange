@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": ["DATABASE_URL", "JWT_SECRET", "SALT_ROUNDS"],
+      "env": ["DATABASE_URL", "JWT_SECRET", "SALT_ROUNDS", "REDIS_URL"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
@@ -15,7 +15,13 @@
     },
     "dev": {
       "cache": false,
-      "env": ["DATABASE_URL", "JWT_SECRET", "SALT_ROUNDS", "NODE_ENV"],
+      "env": [
+        "DATABASE_URL",
+        "JWT_SECRET",
+        "SALT_ROUNDS",
+        "NODE_ENV",
+        "REDIS_URLs"
+      ],
       "persistent": true
     },
     "db:migrate": {
