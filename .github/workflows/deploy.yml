@@ -29,3 +29,22 @@ jobs:
           file: docker/Dockerfile.web
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/crypto-web:latest
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/my-app
+            rm -f .env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+            echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "SALT_ROUNDS=${{ secrets.SALT_ROUNDS }}" >> .env
+            echo "REDIS_CHANNEL_ORDERBOOK_PREFIX=${{ secrets.REDIS_CHANNEL_ORDERBOOK_PREFIX }}" >> .env
+            echo "REDIS_CHANNEL_TRADE_PREFIX=${{ secrets.REDIS_CHANNEL_TRADE_PREFIX }}" >> .env
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
