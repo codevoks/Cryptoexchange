@@ -9,6 +9,7 @@ This is a crpto currency exchage in Turborepo
 - Docker (Optional)
 - npm
 - PostgreSQL & Redis (installed locally or via Docker)
+DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 ```
 
 ## Project Structure (Monorepo)
