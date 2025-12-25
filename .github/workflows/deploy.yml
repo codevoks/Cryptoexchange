@@ -54,7 +54,7 @@ jobs:
           script: |
             cd ~/application
             rm -f .env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+            echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}" >> .env
             echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
             echo "SALT_ROUNDS=${{ secrets.SALT_ROUNDS }}" >> .env
