@@ -24,7 +24,11 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           IMAGE_TAG: latest
         run: |
-          docker compose -f docker-compose.build.yml build
+          docker compose -f docker-compose.build.yml build \
+          --build-arg REDIS_URL=${{ secrets.REDIS_URL }} \
+          --build-arg DATABASE_URL="postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}" \
+          --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
+          --build-arg SALT_ROUNDS=${{ secrets.SALT_ROUNDS }} \
           docker compose -f docker-compose.build.yml push
 
       - name: Prepare EC2 directory
