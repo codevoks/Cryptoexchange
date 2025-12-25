@@ -30,8 +30,8 @@ jobs:
       - name: Prepare EC2 directory
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             mkdir -p ~/application
@@ -39,8 +39,8 @@ jobs:
       - name: Copy docker-compose.prod.yml to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "docker-compose.prod.yml"
           target: "~/application"
@@ -48,8 +48,8 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/application
@@ -58,8 +58,9 @@ jobs:
             echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
             echo "SALT_ROUNDS=${{ secrets.SALT_ROUNDS }}" >> .env
-            echo "REDIS_CHANNEL_ORDERBOOK_PREFIX=${{ secrets.REDIS_CHANNEL_ORDERBOOK_PREFIX }}" >> .env
-            echo "REDIS_CHANNEL_TRADE_PREFIX=${{ secrets.REDIS_CHANNEL_TRADE_PREFIX }}" >> .env
+            echo "REDIS_CHANNEL_ORDERBOOK_PREFIX=${{ vars.REDIS_CHANNEL_ORDERBOOK_PREFIX }}" >> .env
+            echo "REDIS_CHANNEL_TRADE_PREFIX=${{ vars.REDIS_CHANNEL_TRADE_PREFIX }}" >> .env
+            echo "NEXT_PUBLIC_WS_URL=wss://${{ vars.EC2_HOST }}:8080" >> .env
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml down
             docker-compose -f docker-compose.prod.yml up -d
