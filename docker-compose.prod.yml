@@ -1,0 +1,64 @@
+services:
+  web:
+    image: crypto-web:latest
+    container_name: crypto-web
+    restart: always
+    expose:
+      - "3000"
+    depends_on:
+      - redis
+      - ws-server
+      - engine
+    env_file:
+      - ./.env
+
+  ws-server:
+    image: crypto-ws:latest
+    container_name: crypto-ws
+    expose:
+      - "8080"
+    depends_on:
+      - redis
+    env_file:
+      - ./.env
+
+  engine:
+    image: crypto-engine:latest
+    container_name: crypto-engine
+    restart: always
+    depends_on:
+      - redis
+      - postgres
+    env_file:
+      - ./.env
+
+  postgres:
+    image: postgres:16
+    container_name: crypto-postgres
+    restart: always
+    environment:
+      - POSTGRES_DB= ${POSTGRES_DB}
+      - POSTGRES_USER= ${POSTGRES_USER}
+      - POSTGRES_PASSWORD= ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: crypto-redis
+    restart: always
+
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: crypto-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./docker/certs:/etc/ssl/certs:ro
+  #   depends_on:
+  #     - web
+  #     - ws-server
+volumes:
+  pgdata:
