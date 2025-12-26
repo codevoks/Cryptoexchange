@@ -26,6 +26,10 @@ jobs:
       - name: Turbo Prune WS-Server
         run: npx turbo prune ws-server --docker
 
+      - name: Copy root files into pruned repo
+        run: |
+          cp package.json package-lock.json turbo.json .npmrc ./out/full/
+
       - name: Build & Push Web
         run: |
           docker build -f docker/Dockerfile.web -t ${{ secrets.DOCKER_USERNAME }}/crypto-web:latest ./out/full
