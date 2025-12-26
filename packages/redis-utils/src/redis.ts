@@ -1,38 +1,48 @@
 import dotenv from "dotenv";
 dotenv.config({ path: "../../.env" });
-import { createClient } from "redis";
+import { createClient, RedisClientType } from "redis";
 
-const REDIS_URL = process.env.REDIS_URL;
+let clients: {
+  queueClient?: RedisClientType;
+  queueInsertClient?: RedisClientType;
+  queueConsumeClient?: RedisClientType;
+  pubClient?: RedisClientType;
+  subClient?: RedisClientType;
+  snapShotClient?: RedisClientType;
+} | null = null;
 
-if (!process.env.REDIS_URL) {
-  throw new Error("REDIS_URL is not set in the environment.");
+export function getRedisClients() {
+  if (!process.env.REDIS_URL) throw new Error("REDIS_URL not set");
+  
+  if (!clients) {
+    const url = process.env.REDIS_URL;
+
+    clients = {
+      queueClient: createClient({ url }),
+      queueInsertClient: createClient({ url }),
+      queueConsumeClient: createClient({ url }),
+      pubClient: createClient({ url }),
+      subClient: createClient({ url }),
+      snapShotClient: createClient({ url }),
+    };
+
+    Object.values(clients).forEach((c) =>
+      c?.on("error", (err) => console.error("Redis error:", err))
+    );
+  }
+
+  return clients;
 }
-
-export const queueClient = createClient({ url: REDIS_URL });
-export const queueInsertClient = createClient({ url: REDIS_URL });
-export const queueConsumeClient = createClient({ url: REDIS_URL });
-export const pubClient = createClient({ url: REDIS_URL });
-export const subClient = createClient({ url: REDIS_URL });
-export const snapShotClient = createClient({ url: REDIS_URL });
-
-pubClient.on("error", (err) => console.error("Redis Pub Error:", err));
-queueInsertClient.on("error", (err) =>
-  console.error("Redis Queue Error:", err)
-);
-queueConsumeClient.on("error", (err) =>
-  console.error("Redis Queue Error:", err)
-);
-subClient.on("error", (err) => console.error("Redis Sub Error:", err));
-snapShotClient.on("error", (err) => console.error("Redis Sub Error:", err));
 
 async function connectRedisClient() {
   try {
+    const clients = getRedisClients();
     await Promise.all([
-      queueInsertClient.connect(),
-      queueConsumeClient.connect(),
-      pubClient.connect(),
-      subClient.connect(),
-      snapShotClient.connect(),
+      clients.queueInsertClient?.connect(),
+      clients.queueConsumeClient?.connect(),
+      clients.pubClient?.connect(),
+      clients.subClient?.connect(),
+      clients.snapShotClient?.connect(),
     ]);
   } catch (error) {
     console.log("Error connecting to redis: ", error);
