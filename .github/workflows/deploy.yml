@@ -19,30 +19,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Turbo Prune Web
-        run: npx turbo prune web --docker
-      - name: Turbo Prune Engine
-        run: npx turbo prune engine --docker
-      - name: Turbo Prune WS-Server
-        run: npx turbo prune ws-server --docker
-
-      - name: Copy root files into pruned repo
-        run: |
-          cp package.json package-lock.json turbo.json .npmrc ./out/full/
-          cp -r apps ./out/full/
-          cp -r packages ./out/full/
-
       - name: Build & Push Web
         run: |
-          docker build -f docker/Dockerfile.web -t ${{ secrets.DOCKER_USERNAME }}/crypto-web:latest ./out/full
-          docker push ${{ secrets.DOCKER_USERNAME }}//crypto-web:$latest
+          docker build -f docker/Dockerfile.web -t ${{ secrets.DOCKER_USERNAME }}/crypto-web:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/crypto-web:$latest
       - name: Build & Push Engine
         run: |
-          docker build -f docker/Dockerfile.engine -t ${{ secrets.DOCKER_USERNAME }}/crypto-engine:latest ./out/full
+          docker build -f docker/Dockerfile.engine -t ${{ secrets.DOCKER_USERNAME }}/crypto-engine:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/crypto-engine:$latest
       - name: Build & Push WS-Server
         run: |
-          docker build -f docker/Dockerfile.ws-server -t ${{ secrets.DOCKER_USERNAME }}/crypto-ws:latest ./out/full
+          docker build -f docker/Dockerfile.ws-server -t ${{ secrets.DOCKER_USERNAME }}/crypto-ws:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/crypto-ws:$latest
 
       - name: Prepare EC2 directory
