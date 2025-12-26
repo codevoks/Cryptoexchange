@@ -19,18 +19,25 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & Push via Compose
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          IMAGE_TAG: latest
-        run: |
-          docker compose -f docker-compose.build.yml build \
-          --build-arg REDIS_URL=${{ secrets.REDIS_URL }} \
-          --build-arg DATABASE_URL="postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}" \
-          --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
-          --build-arg SALT_ROUNDS=${{ secrets.SALT_ROUNDS }}
+      - name: Turbo Prune Web
+        run: npx turbo prune web --docker
+      - name: Turbo Prune Engine
+        run: npx turbo prune engine --docker
+      - name: Turbo Prune WS-Server
+        run: npx turbo prune ws-server --docker
 
-          docker compose -f docker-compose.build.yml push
+      - name: Build & Push Web
+        run: |
+          docker build -f docker/Dockerfile.web -t $DOCKER_USERNAME/crypto-web:$latest ./out/full
+          docker push $DOCKER_USERNAME/crypto-web:$latest
+      - name: Build & Push Engine
+        run: |
+          docker build -f docker/Dockerfile.engine -t $DOCKER_USERNAME/crypto-engine:$latest ./out/full
+          docker push $DOCKER_USERNAME/crypto-engine:$latest
+      - name: Build & Push WS-Server
+        run: |
+          docker build -f docker/Dockerfile.ws-server -t $DOCKER_USERNAME/crypto-ws:$latest ./out/full
+          docker push $DOCKER_USERNAME/crypto-ws:$latest
 
       - name: Prepare EC2 directory
         uses: appleboy/ssh-action@v0.1.7
