@@ -22,15 +22,15 @@ jobs:
       - name: Build & Push Web
         run: |
           docker build -f docker/Dockerfile.web -t ${{ secrets.DOCKER_USERNAME }}/crypto-web:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/crypto-web:$latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/crypto-web:latest
       - name: Build & Push Engine
         run: |
           docker build -f docker/Dockerfile.engine -t ${{ secrets.DOCKER_USERNAME }}/crypto-engine:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/crypto-engine:$latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/crypto-engine:latest
       - name: Build & Push WS-Server
         run: |
           docker build -f docker/Dockerfile.ws-server -t ${{ secrets.DOCKER_USERNAME }}/crypto-ws:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/crypto-ws:$latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/crypto-ws:latest
 
       - name: Prepare EC2 directory
         uses: appleboy/ssh-action@v0.1.7
