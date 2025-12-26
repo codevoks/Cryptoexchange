@@ -28,15 +28,15 @@ jobs:
 
       - name: Build & Push Web
         run: |
-          docker build -f docker/Dockerfile.web -t $DOCKER_USERNAME/crypto-web:$latest ./out/full
+          docker build -f docker/Dockerfile.web -t $DOCKER_USERNAME/crypto-web:latest ./out/full
           docker push $DOCKER_USERNAME/crypto-web:$latest
       - name: Build & Push Engine
         run: |
-          docker build -f docker/Dockerfile.engine -t $DOCKER_USERNAME/crypto-engine:$latest ./out/full
+          docker build -f docker/Dockerfile.engine -t $DOCKER_USERNAME/crypto-engine:latest ./out/full
           docker push $DOCKER_USERNAME/crypto-engine:$latest
       - name: Build & Push WS-Server
         run: |
-          docker build -f docker/Dockerfile.ws-server -t $DOCKER_USERNAME/crypto-ws:$latest ./out/full
+          docker build -f docker/Dockerfile.ws-server -t $DOCKER_USERNAME/crypto-ws:latest ./out/full
           docker push $DOCKER_USERNAME/crypto-ws:$latest
 
       - name: Prepare EC2 directory
