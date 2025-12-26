@@ -1,4 +1,4 @@
-import { getRedisClients } from "./redis";
+import { getRedisClients, connectRedisClients } from "./redis";
 import { MessageType } from "@repo/types/message";
 
 export async function setUpdate(
@@ -7,8 +7,10 @@ export async function setUpdate(
   payload: any
 ) {
   try {
+    await connectRedisClients();
     const { snapShotClient } = getRedisClients();
-    await snapShotClient?.set(channel, JSON.stringify({ messageType, payload }));
+    if (!snapShotClient) return; // Skip during build time
+    await snapShotClient.set(channel, JSON.stringify({ messageType, payload }));
   } catch (error) {
     console.log(
       "Error updating SNAPSHOT of type " +
@@ -21,8 +23,10 @@ export async function setUpdate(
 
 export async function getUpdate(channel: string) {
   try {
+    await connectRedisClients();
     const { snapShotClient } = getRedisClients();
-    const raw = await snapShotClient?.get(channel);
+    if (!snapShotClient) return null; // Skip during build time
+    const raw = await snapShotClient.get(channel);
     if (!raw) {
       return null;
     }

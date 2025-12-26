@@ -11,8 +11,47 @@ let clients: {
   snapShotClient?: RedisClientType;
 } | null = null;
 
+let connecting = false;
+let connected = false;
+
+async function ensureConnected() {
+  if (connected || connecting) return;
+  
+  if (!process.env.REDIS_URL) {
+    // Skip connection if REDIS_URL not set (e.g., during build time)
+    return;
+  }
+
+  connecting = true;
+  try {
+    const clients = getRedisClients();
+    await Promise.all([
+      clients.queueInsertClient?.connect(),
+      clients.queueConsumeClient?.connect(),
+      clients.pubClient?.connect(),
+      clients.subClient?.connect(),
+      clients.snapShotClient?.connect(),
+    ]);
+    connected = true;
+  } catch (error) {
+    console.log("Error connecting to redis: ", error);
+  } finally {
+    connecting = false;
+  }
+}
+
 export function getRedisClients() {
-  if (!process.env.REDIS_URL) throw new Error("REDIS_URL not set");
+  // If REDIS_URL not set, return empty clients object (e.g., during build time)
+  if (!process.env.REDIS_URL) {
+    return {
+      queueClient: undefined,
+      queueInsertClient: undefined,
+      queueConsumeClient: undefined,
+      pubClient: undefined,
+      subClient: undefined,
+      snapShotClient: undefined,
+    };
+  }
   
   if (!clients) {
     const url = process.env.REDIS_URL;
@@ -34,19 +73,7 @@ export function getRedisClients() {
   return clients;
 }
 
-async function connectRedisClient() {
-  try {
-    const clients = getRedisClients();
-    await Promise.all([
-      clients.queueInsertClient?.connect(),
-      clients.queueConsumeClient?.connect(),
-      clients.pubClient?.connect(),
-      clients.subClient?.connect(),
-      clients.snapShotClient?.connect(),
-    ]);
-  } catch (error) {
-    console.log("Error connecting to redis: ", error);
-  }
+// Export connection function - call this when Redis is actually needed
+export async function connectRedisClients() {
+  await ensureConnected();
 }
-
-connectRedisClient();

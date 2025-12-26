@@ -1,10 +1,12 @@
-import { getRedisClients } from "./redis";
+import { getRedisClients, connectRedisClients } from "./redis";
 import { queuePushCounter, queueConsumeCounter } from "@repo/metrics-utils";
 
 export async function pushToQueue(queueName: string, payload: any) {
   try {
+    await connectRedisClients();
     const { queueInsertClient } = getRedisClients();
-    await queueInsertClient?.lPush(queueName, JSON.stringify(payload));
+    if (!queueInsertClient) return; // Skip during build time
+    await queueInsertClient.lPush(queueName, JSON.stringify(payload));
     queuePushCounter.labels(queueName).inc();
   } catch (error) {
     console.log("Error pushing in redis queue " + queueName + " : ", error);
@@ -16,10 +18,12 @@ export async function consumeFromQueue(
   handler: (data: any) => Promise<void>
 ) {
   try {
+    await connectRedisClients();
     const { queueConsumeClient } = getRedisClients();
+    if (!queueConsumeClient) return; // Skip during build time
     while (true) {
       try {
-        const result = await queueConsumeClient?.brPop(queueName, 5);
+        const result = await queueConsumeClient.brPop(queueName, 5);
         if (result?.element) {
           const data = JSON.parse(result.element);
           await handler(data);
