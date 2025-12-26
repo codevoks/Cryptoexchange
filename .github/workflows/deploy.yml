@@ -29,6 +29,8 @@ jobs:
       - name: Copy root files into pruned repo
         run: |
           cp package.json package-lock.json turbo.json .npmrc ./out/full/
+          cp -r apps ./out/full/
+          cp -r packages ./out/full/
 
       - name: Build & Push Web
         run: |
