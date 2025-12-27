@@ -6,9 +6,14 @@ services:
     expose:
       - "3000"
     depends_on:
-      - redis
-      - ws-server
-      - engine
+      redis:
+        condition: service_started
+      ws-server:
+        condition: service_started
+      engine:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     env_file:
       - ./.env
 
@@ -18,7 +23,8 @@ services:
     expose:
       - "8080"
     depends_on:
-      - redis
+      redis:
+        condition: service_started
     env_file:
       - ./.env
 
@@ -27,8 +33,10 @@ services:
     container_name: crypto-engine
     restart: always
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     env_file:
       - ./.env
 
@@ -42,6 +50,12 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   redis:
     image: redis:7
