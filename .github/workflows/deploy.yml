@@ -112,5 +112,5 @@ jobs:
 
             # 4. Pull & run containers
             docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml down -v
             docker compose -f docker-compose.prod.yml up -d

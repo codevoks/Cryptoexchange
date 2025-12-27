@@ -8,7 +8,6 @@ import { getUserByEmail } from "@repo/db/index";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function POST(request: NextRequest) {
-  console.log("LOGIN ROUTE HIT");
   try {
     const body = await request.json();
     const result = logInSchema.safeParse(body);
