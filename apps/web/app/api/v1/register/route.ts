@@ -18,6 +18,7 @@ const SALT_ROUNDS = Number(process.env.SALT_ROUNDS);
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("REGISTER ROUTE HIT");
     const body = await request.json();
     const result = RegisterSchema.safeParse(body);
     if (!result.success) {
