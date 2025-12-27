@@ -3,8 +3,8 @@ services:
     image: ${DOCKER_USERNAME}/crypto-web:latest
     container_name: crypto-web
     restart: always
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
     depends_on:
       redis:
         condition: service_started
@@ -20,8 +20,8 @@ services:
   ws-server:
     image: ${DOCKER_USERNAME}/crypto-ws:latest
     container_name: crypto-ws
-    expose:
-      - "8080"
+    ports:
+      - "8080:8080"
     depends_on:
       redis:
         condition: service_started
