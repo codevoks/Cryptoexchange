@@ -1,6 +1,6 @@
 services:
   web:
-    image: <DOCKER_USERNAME>/crypto-web:latest
+    image: ${DOCKER_USERNAME}/crypto-web:latest
     container_name: crypto-web
     restart: always
     expose:
@@ -13,7 +13,7 @@ services:
       - ./.env
 
   ws-server:
-    image: <DOCKER_USERNAME>/crypto-ws:latest
+    image: ${DOCKER_USERNAME}/crypto-ws:latest
     container_name: crypto-ws
     expose:
       - "8080"
@@ -23,7 +23,7 @@ services:
       - ./.env
 
   engine:
-    image: <DOCKER_USERNAME>/crypto-engine:latest
+    image: ${DOCKER_USERNAME}/crypto-engine:latest
     container_name: crypto-engine
     restart: always
     depends_on:
