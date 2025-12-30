@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 export default async function authMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const PUBLIC_PATHS = ["/", "home", "/login", "/about", "/register"];
+  const PUBLIC_PATHS = ["/", "/home", "/login", "/about", "/register"];
   const isPublicPath = PUBLIC_PATHS.includes(pathname);
 
   if (isPublicPath) {

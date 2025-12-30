@@ -25,7 +25,8 @@ export async function verifyJWT(token: string, JWT_SECRET: string) {
   try {
     const secret = encoder.encode(JWT_SECRET);
     // return jwt.verify(token, JWT_SECRET) as JwtPayLoad;
-    return await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, secret);
+    return payload as JwtPayLoad;
   } catch (error) {
     return null;
   }

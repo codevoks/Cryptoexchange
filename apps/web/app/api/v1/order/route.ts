@@ -17,10 +17,8 @@ export async function POST(req: Request) {
     const token = cookieHeader.split("token=")[1];
     if (!token) throw new Error("Token not found");
 
-    const result = await verifyJWT(token, JWT_SECRET as string);
-    if (!result) throw new Error("Invalid token");
-
-    const userPayload = result.payload as JwtPayLoad;
+    const userPayload = await verifyJWT(token, JWT_SECRET as string);
+    if (!userPayload) throw new Error("Invalid token");
 
     const order: CreateOrderInput = {
       ...body,

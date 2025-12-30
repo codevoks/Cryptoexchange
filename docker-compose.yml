@@ -40,7 +40,7 @@ services:
       - ./.env.docker
 
   postgres:
-    image: postgres:latest
+    image: postgres:16
     container_name: crypto-postgres
     restart: always
     environment:
