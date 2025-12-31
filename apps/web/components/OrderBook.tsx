@@ -64,11 +64,14 @@ export default function OrderBook({ symbol }: { symbol: string }) {
   useEffect(() => {
     if (!WS_URL) {
       console.error("⚠️ NEXT_PUBLIC_WS_URL is not defined!");
+      console.error("⚠️ This means the Docker image was built without the build arg!");
+      console.error("⚠️ The WebSocket URL must be set at BUILD TIME, not runtime.");
       return;
     }
 
     const wsUrl = WS_URL + "?symbols=" + symbol;
     console.log("🔌 Connecting to WebSocket:", wsUrl);
+    console.log("🔍 WS_URL value:", WS_URL);
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
