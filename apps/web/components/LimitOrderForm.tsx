@@ -7,10 +7,7 @@ interface LimitOrderFormProps {
   symbol?: string; // optional prop for which symbol this order is for
 }
 
-export default function LimitOrderForm({
-  side,
-  symbol = "BTCUSDT",
-}: LimitOrderFormProps) {
+export default function LimitOrderForm({ side, symbol }: LimitOrderFormProps) {
   const isBuy = side === "BUY";
   const baseColor = isBuy ? "#1a3e2a" : "#3a1a1a";
   const textColor = isBuy ? "#4fff8a" : "#ff6464";

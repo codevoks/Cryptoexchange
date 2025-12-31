@@ -4,7 +4,7 @@ import OrderTabs from "./OrderTabs";
 import LimitOrderForm from "./LimitOrderForm";
 import MarketOrderForm from "./MarketOrderForm";
 
-export default function TradeTrigger() {
+export default function TradeTrigger({ symbol }: { symbol: string }) {
   const [side, setSide] = useState<"BUY" | "SELL">("BUY");
   const [orderType, setOrderType] = useState<"LIMIT" | "MARKET">("LIMIT");
 
@@ -45,9 +45,9 @@ export default function TradeTrigger() {
       {/* Form */}
       <div className="flex-1 mt-4">
         {orderType === "LIMIT" ? (
-          <LimitOrderForm side={side} />
+          <LimitOrderForm side={side} symbol={symbol} />
         ) : (
-          <MarketOrderForm side={side} />
+          <MarketOrderForm side={side} symbol={symbol} />
         )}
       </div>
     </div>

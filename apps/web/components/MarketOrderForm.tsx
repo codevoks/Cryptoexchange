@@ -4,9 +4,13 @@ import { useState } from "react";
 
 interface MarketOrderFormProps {
   side: "BUY" | "SELL";
+  symbol?: string;
 }
 
-export default function MarketOrderForm({ side }: MarketOrderFormProps) {
+export default function MarketOrderForm({
+  side,
+  symbol,
+}: MarketOrderFormProps) {
   const [quantity, setQuantity] = useState<number | "">("");
   const isBuy = side === "BUY";
 
@@ -23,7 +27,7 @@ export default function MarketOrderForm({ side }: MarketOrderFormProps) {
       userId: "user-123",
       type: "MARKET",
       side,
-      symbol: "BTCUSDT",
+      symbol: symbol,
       quantity: Number(quantity),
       pricePerUnit: null,
     };

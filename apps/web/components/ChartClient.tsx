@@ -271,7 +271,7 @@ export default function ChartClient() {
                 <TradingChart symbols={[symbolData]} />
               </div>
               <OrderBook symbol={symbol} />
-              <TradeTrigger />
+              <TradeTrigger symbol={symbol} />
             </div>
           </div>
         </>
