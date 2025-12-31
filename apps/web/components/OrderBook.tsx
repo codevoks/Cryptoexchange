@@ -62,7 +62,27 @@ export default function OrderBook({ symbol }: { symbol: string }) {
   }, [symbol]);
 
   useEffect(() => {
-    const ws = new WebSocket(WS_URL + "?symbols=" + symbol);
+    if (!WS_URL) {
+      console.error("⚠️ NEXT_PUBLIC_WS_URL is not defined!");
+      return;
+    }
+
+    const wsUrl = WS_URL + "?symbols=" + symbol;
+    console.log("🔌 Connecting to WebSocket:", wsUrl);
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log("✅ WebSocket connected for symbol:", symbol);
+    };
+
+    ws.onerror = (error) => {
+      console.error("❌ WebSocket error for symbol:", symbol, error);
+    };
+
+    ws.onclose = (event) => {
+      console.log("🔌 WebSocket closed for symbol:", symbol, "Code:", event.code, "Reason:", event.reason);
+    };
+
     ws.onmessage = (event) => {
       console.log("WEBSOCKET MESSAGE");
       const message = JSON.parse(event.data);
@@ -89,7 +109,10 @@ export default function OrderBook({ symbol }: { symbol: string }) {
         }
       }
     };
-    return () => ws.close();
+    return () => {
+      console.log("🧹 Cleaning up WebSocket for symbol:", symbol);
+      ws.close();
+    };
   }, [symbol]);
 
   const renderBars = (orders: Order[], side: "BUY" | "SELL") => {
