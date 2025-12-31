@@ -116,6 +116,7 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
 });
 
 // Start HTTP + WS server
-server.listen(WS_PORT, () => {
-  // console.log("🧠 WebSocket server running at ws://localhost:" + WS_PORT);
+// Bind to 0.0.0.0 to accept connections from outside the container
+server.listen(WS_PORT || 8080, "0.0.0.0", () => {
+  console.log(`🧠 WebSocket server running at ws://0.0.0.0:${WS_PORT || 8080}`);
 });
