@@ -2,7 +2,13 @@
 import { MessageType } from "@repo/types/message";
 import { useEffect, useState } from "react";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL;
+// Get WebSocket URL - must be set at build time via NEXT_PUBLIC_WS_URL
+// This is a TEMPORARY fallback - the proper fix is to rebuild the Docker image with the build arg
+const WS_URL =
+  process.env.NEXT_PUBLIC_WS_URL ||
+  (typeof window !== "undefined"
+    ? `ws://${window.location.hostname}:8080`
+    : undefined);
 
 type Order = {
   price: number;
@@ -64,8 +70,12 @@ export default function OrderBook({ symbol }: { symbol: string }) {
   useEffect(() => {
     if (!WS_URL) {
       console.error("⚠️ NEXT_PUBLIC_WS_URL is not defined!");
-      console.error("⚠️ This means the Docker image was built without the build arg!");
-      console.error("⚠️ The WebSocket URL must be set at BUILD TIME, not runtime.");
+      console.error(
+        "⚠️ This means the Docker image was built without the build arg!"
+      );
+      console.error(
+        "⚠️ The WebSocket URL must be set at BUILD TIME, not runtime."
+      );
       return;
     }
 
@@ -83,7 +93,14 @@ export default function OrderBook({ symbol }: { symbol: string }) {
     };
 
     ws.onclose = (event) => {
-      console.log("🔌 WebSocket closed for symbol:", symbol, "Code:", event.code, "Reason:", event.reason);
+      console.log(
+        "🔌 WebSocket closed for symbol:",
+        symbol,
+        "Code:",
+        event.code,
+        "Reason:",
+        event.reason
+      );
     };
 
     ws.onmessage = (event) => {
